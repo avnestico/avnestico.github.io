@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>College Football Playoff Selector (Score Chart)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #2c3e50; }
+    .game { margin-bottom: 15px; }
+    .buttons { margin-top: 5px; }
+    button.choice { margin-right: 10px; padding: 6px 12px; }
+    .selected { background-color: #2c3e50; color: #fff; }
+    #results { margin-top: 25px; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+    .champion { font-weight: bold; }
+    .firstOut { color: #a00; }
+  </style>
+</head>
+<body>
+  <h1>College Football Playoff Selector</h1>
+
+  <!-- Championship matchups -->
+  <div class="game">Big Ten Championship:
+    <div class="buttons">
+      <button id="btn-indiana" class="choice" onclick="setChoice('bigTen','Indiana')">Indiana</button>
+      <button id="btn-ohio" class="choice" onclick="setChoice('bigTen','Ohio State')">Ohio State</button>
+    </div>
+  </div>
+  <div class="game">Big 12 Championship:
+    <div class="buttons">
+      <button id="btn-tt" class="choice" onclick="setChoice('big12','Texas Tech')">Texas Tech</button>
+      <button id="btn-byu" class="choice" onclick="setChoice('big12','BYU')">BYU</button>
+    </div>
+  </div>
+  <div class="game">SEC Championship:
+    <div class="buttons">
+      <button id="btn-bama" class="choice" onclick="setChoice('sec','Alabama')">Alabama</button>
+      <button id="btn-uga" class="choice" onclick="setChoice('sec','Georgia')">Georgia</button>
+    </div>
+  </div>
+  <div class="game">American Championship:
+    <div class="buttons">
+      <button id="btn-nt" class="choice" onclick="setChoice('american','North Texas')">North Texas</button>
+      <button id="btn-tulane" class="choice" onclick="setChoice('american','Tulane')">Tulane</button>
+    </div>
+  </div>
+  <div class="game">ACC Championship:
+    <div class="buttons">
+      <button id="btn-virginia" class="choice" onclick="setChoice('acc','Virginia')">Virginia</button>
+      <button id="btn-duke" class="choice" onclick="setChoice('acc','Duke')">Duke</button>
+    </div>
+  </div>
+  <div class="game">Sun Belt Championship:
+    <div class="buttons">
+      <button id="btn-jmu" class="choice" onclick="setChoice('sunBelt','JMU')">JMU</button>
+      <button id="btn-troy" class="choice" onclick="setChoice('sunBelt','Troy')">Troy</button>
+    </div>
+  </div>
+  <div class="game">Mountain West Championship:
+    <div class="buttons">
+      <button id="btn-unlv" class="choice" onclick="setChoice('mwc','UNLV')">UNLV</button>
+      <button id="btn-boise" class="choice" onclick="setChoice('mwc','Boise State')">Boise State</button>
+    </div>
+  </div>
+
+  <div id="results"></div>
+
+<script>
+let selections = {};
+
+// Score chart values with conference info
+const scoreChart = {
+  "Ohio State": {win:1733, loss:1418, conference:"Big Ten"},
+  "Indiana": {win:1661, loss:1359, conference:"Big Ten"},
+  "Georgia": {win:1582, loss:1294, conference:"SEC"},
+  "Oregon": {fixed:1353, conference:"Pac-12"},
+  "Ole Miss": {fixed:1306, conference:"SEC"},
+  "Texas Tech": {win:1393, loss:1139, conference:"Big 12"},
+  "Texas A&M": {fixed:1178, conference:"SEC"},
+  "Oklahoma": {fixed:1106, conference:"Big 12"},
+  "Notre Dame": {fixed:1061, conference:"Independent"},
+  "Alabama": {win:1121, loss:917, conference:"SEC"},
+  "BYU": {win:1036, loss:848, conference:"Big 12"},
+  "Miami": {fixed:844, conference:"ACC"},
+  "Virginia": {win:674, loss:552, conference:"ACC"},
+  "JMU": {win:392, loss:320, conference:"Sun Belt"},
+  "North Texas": {win:380, loss:311, conference:"American"},
+  "Tulane": {win:330, loss:270, conference:"American"},
+  "UNLV": {win:275, loss:225, conference:"Mountain West"},
+  "Duke": {win:220, loss:180, conference:"ACC"}
+};
+
+function setChoice(game, team) {
+  selections[game] = team;
+  const buttons = document.querySelectorAll(`.game .buttons button`);
+  buttons.forEach(btn => {
+    if (btn.getAttribute("onclick").includes(game) && btn.textContent === team) {
+      btn.classList.add("selected");
+    } else if (btn.getAttribute("onclick").includes(game)) {
+      btn.classList.remove("selected");
+    }
+  });
+  calculatePlayoff(); // rerun whenever a choice is made
+}
+
+// Default favorites
+const defaultFavorites = {
+  bigTen: "Indiana",
+  big12: "Texas Tech",
+  sec: "Alabama",
+  american: "North Texas",
+  acc: "Virginia",
+  sunBelt: "JMU",
+  mwc: "UNLV"
+};
+
+window.onload = () => {
+  for (let game in defaultFavorites) {
+    setChoice(game, defaultFavorites[game]);
+  }
+  calculatePlayoff(); // run once on page load
+};
+
+function getScore(team, outcome) {
+  const entry = scoreChart[team];
+  if (!entry) return 0;
+  if (entry.fixed !== undefined) return entry.fixed;
+  return entry[outcome];
+}
+
+function calculatePlayoff() {
+  const bigTen = selections.bigTen;
+  const big12 = selections.big12;
+  const sec = selections.sec;
+  const american = selections.american;
+  const acc = selections.acc;
+  const sunBelt = selections.sunBelt;
+  const mwc = selections.mwc;
+
+  const conferenceTeams = [
+    {conf:"bigTen", team:bigTen},
+    {conf:"big12", team:big12},
+    {conf:"sec", team:sec},
+    {conf:"american", team:american},
+    {conf:"acc", team:acc},
+    {conf:"sunBelt", team:sunBelt},
+    {conf:"mwc", team:mwc}
+  ];
+
+  const championWins = conferenceTeams.map(c => ({
+    team: c.team,
+    score: getScore(c.team, "win"),
+    champ: true
+  })).sort((a,b)=>b.score-a.score);
+
+  const qualified = championWins.slice(0,5);
+  const qualifiedTeams = new Set(qualified.map(q => q.team));
+
+  const bestRemainingByTeam = new Map();
+
+  conferenceTeams.forEach(c => {
+    const team = c.team;
+    const lossScore = getScore(team, "loss");
+    if (!qualifiedTeams.has(team)) {
+      const existing = bestRemainingByTeam.get(team);
+      if (!existing || lossScore > existing.score) {
+        bestRemainingByTeam.set(team, { team, score: lossScore, champ: false });
+      }
+    }
+  });
+
+  for (let team in scoreChart) {
+    if (qualifiedTeams.has(team)) continue;
+    const entry = scoreChart[team];
+    const score = (entry.fixed !== undefined) ? entry.fixed : getScore(team, "loss");
+    const existing = bestRemainingByTeam.get(team);
+    if (!existing || score > existing.score) {
+      bestRemainingByTeam.set(team, { team, score, champ: false });
+    }
+  }
+
+  // Select top 9 at-large
+  const atLarge = Array.from(bestRemainingByTeam.values())
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,9);
+
+  const finalTeams = qualified.concat(atLarge.slice(0,7)).sort((a,b)=>b.score-a.score);
+  const firstTwoOut = atLarge.slice(7,9);
+
+  document.getElementById("results").innerHTML =
+    "<h2>Qualified Teams</h2><ol>" +
+    finalTeams.map(t => {
+      const conf = scoreChart[t.team]?.conference || "Unknown";
+      return "<li class='" + (t.champ ? "champion" : "") + "'>" +
+        t.team + " (" + conf + ")</li>";
+    }).join("") +
+    "</ol>" +
+    "<h3>First Two Out</h3><ul>" +
+    firstTwoOut.map(t => {
+      const conf = scoreChart[t.team]?.conference || "Unknown";
+      return "<li class='firstOut'>" + t.team + " (" + conf + ")</li>";
+    }).join("") +
+    "</ul>";
+}
+</script>
+</body>
+</html>
