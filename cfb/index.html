@@ -3,25 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>College Football Playoff Selector 2025</title>
+  <title>Choose-Your-Own CFB Playoff 2025</title>
 <style>
   body { font-family: Arial, sans-serif; margin: 20px; }
   h1 { color: #2c3e50; }
+
   .game { margin-bottom: 15px; }
   .buttons { margin-top: 5px; }
   button.choice { margin-right: 10px; padding: 6px 12px; }
   .selected { background-color: #2c3e50; color: #fff; }
-  #results { margin-top: 25px; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+
   .champion { font-weight: bold; }
   .firstOut { color: #a00; }
 
-  #adjustments { margin-top: 25px; padding: 15px; border: 1px solid #ccc; background: #eef; }
   .adjust-row { margin-bottom: 10px; }
   .adjust-row button { margin: 0 5px; padding: 4px 10px; }
   .active-adjust { background-color: #2c3e50; color: #fff; font-weight: bold; }
 
-  /* Mobile-friendly adjustments */
-  @media (max-width: 600px) {
+  /* Layout wrapper for desktop */
+  .container {
+    display: flex;
+    gap: 100px;
+    align-items: flex-start;
+  }
+  .column {
+    flex: initial;
+  }
+  #results, #adjustments {
+    padding: 15px;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+  }
+  #adjustments { background: #eef; }
+
+  /* Mobile-friendly adjustments (stacked, 2x size) */
+  @media (max-width: 950px) {
     body { font-size: 18px; }
     h1 { font-size: 26px; }
     .game { font-size: 18px; }
@@ -34,62 +50,80 @@
     #results { font-size: 18px; }
     #adjustments { font-size: 18px; }
     .adjust-row button { font-size: 18px; padding: 8px 16px; }
+
+    /* Stack columns on mobile */
+    .container {
+      flex-direction: column;
+      gap: 20px;
+    }
   }
 </style>
 </head>
 <body>
-  <h1>College Football Playoff Selector 2025</h1>
+  <h1>Choose-Your-Own CFB Playoff 2025</h1>
 
-  <!-- Championship matchups -->
-  <div class="game">Big Ten Championship:
-    <div class="buttons">
-      <button id="btn-indiana" class="choice" onclick="setChoice('bigTen','Indiana')">Indiana</button>
-      <button id="btn-ohio" class="choice" onclick="setChoice('bigTen','Ohio State')">Ohio State</button>
+  <div class="container">
+    <!-- Column 1: Games -->
+    <div class="column">
+      <div class="game">Big Ten Championship:
+        <div class="buttons">
+          <button id="btn-indiana" class="choice" onclick="setChoice('bigTen','Indiana')">Indiana</button>
+          <button id="btn-ohio" class="choice" onclick="setChoice('bigTen','Ohio State')">Ohio State</button>
+        </div>
+      </div>
+      <div class="game">Big 12 Championship:
+        <div class="buttons">
+          <button id="btn-tt" class="choice" onclick="setChoice('big12','Texas Tech')">Texas Tech</button>
+          <button id="btn-byu" class="choice" onclick="setChoice('big12','BYU')">BYU</button>
+        </div>
+      </div>
+      <div class="game">SEC Championship:
+        <div class="buttons">
+          <button id="btn-bama" class="choice" onclick="setChoice('sec','Alabama')">Alabama</button>
+          <button id="btn-uga" class="choice" onclick="setChoice('sec','Georgia')">Georgia</button>
+        </div>
+      </div>
+      <div class="game">ACC Championship:
+        <div class="buttons">
+          <button id="btn-virginia" class="choice" onclick="setChoice('acc','Virginia')">Virginia</button>
+          <button id="btn-duke" class="choice" onclick="setChoice('acc','Duke')">Duke</button>
+        </div>
+      </div>
+      <div class="game">American Championship:
+        <div class="buttons">
+          <button id="btn-nt" class="choice" onclick="setChoice('american','North Texas')">North Texas</button>
+          <button id="btn-tulane" class="choice" onclick="setChoice('american','Tulane')">Tulane</button>
+        </div>
+      </div>
+      <div class="game">Sun Belt Championship:
+        <div class="buttons">
+          <button id="btn-jmu" class="choice" onclick="setChoice('sunBelt','JMU')">JMU</button>
+          <button id="btn-troy" class="choice" onclick="setChoice('sunBelt','Troy')">Troy</button>
+        </div>
+      </div>
+      <div class="game">Mountain West Championship:
+        <div class="buttons">
+          <button id="btn-unlv" class="choice" onclick="setChoice('mwc','UNLV')">UNLV</button>
+          <button id="btn-boise" class="choice" onclick="setChoice('mwc','Boise State')">Boise State</button>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="game">Big 12 Championship:
-    <div class="buttons">
-      <button id="btn-tt" class="choice" onclick="setChoice('big12','Texas Tech')">Texas Tech</button>
-      <button id="btn-byu" class="choice" onclick="setChoice('big12','BYU')">BYU</button>
-    </div>
-  </div>
-  <div class="game">SEC Championship:
-    <div class="buttons">
-      <button id="btn-bama" class="choice" onclick="setChoice('sec','Alabama')">Alabama</button>
-      <button id="btn-uga" class="choice" onclick="setChoice('sec','Georgia')">Georgia</button>
-    </div>
-  </div>
-  <div class="game">ACC Championship:
-    <div class="buttons">
-      <button id="btn-virginia" class="choice" onclick="setChoice('acc','Virginia')">Virginia</button>
-      <button id="btn-duke" class="choice" onclick="setChoice('acc','Duke')">Duke</button>
-    </div>
-  </div>
-  <div class="game">American Championship:
-    <div class="buttons">
-      <button id="btn-nt" class="choice" onclick="setChoice('american','North Texas')">North Texas</button>
-      <button id="btn-tulane" class="choice" onclick="setChoice('american','Tulane')">Tulane</button>
-    </div>
-  </div>
-  <div class="game">Sun Belt Championship:
-    <div class="buttons">
-      <button id="btn-jmu" class="choice" onclick="setChoice('sunBelt','JMU')">JMU</button>
-      <button id="btn-troy" class="choice" onclick="setChoice('sunBelt','Troy')">Troy</button>
-    </div>
-  </div>
-  <div class="game">Mountain West Championship:
-    <div class="buttons">
-      <button id="btn-unlv" class="choice" onclick="setChoice('mwc','UNLV')">UNLV</button>
-      <button id="btn-boise" class="choice" onclick="setChoice('mwc','Boise State')">Boise State</button>
-    </div>
-  </div>
 
-  <div id="results"></div>
-  <div id="adjustments"></div>
+    <!-- Column 2: Results -->
+    <div class="column">
+      <div id="results"></div>
+    </div>
+
+    <!-- Column 3: Adjustments -->
+    <div class="column">
+      <div id="adjustments"></div>
+    </div>
+  </div>
 
 <script>
 let selections = {};
-let adjustments = {}; // store percentage adjustments per team
+let adjustments = {}; 
+let lastOrderedTeams = []; // cache last rendered order for adjustments
 
 // Score chart values with conference info
 const scoreChart = {
@@ -123,7 +157,7 @@ function setChoice(game, team) {
       btn.classList.remove("selected");
     }
   });
-  calculatePlayoff();
+  calculatePlayoff(true);
 }
 
 // Default favorites
@@ -141,58 +175,82 @@ window.onload = () => {
   for (let game in defaultFavorites) {
     setChoice(game, defaultFavorites[game]);
   }
-  buildAdjustments();
-  calculatePlayoff();
+  calculatePlayoff(true);
 };
 
 function getScore(team, outcome) {
   const entry = scoreChart[team];
   if (!entry) return 0;
-  let baseScore = (entry.fixed !== undefined) ? entry.fixed : entry[outcome];
+  const baseScore = (entry.fixed !== undefined) ? entry.fixed : entry[outcome];
   const adj = adjustments[team] || 0;
   return baseScore * (1 + adj);
 }
 
-function setAdjustment(team, value) {
-  // If already set to this value, do nothing
-  if ((adjustments[team] || 0) === value) return;
-
-  adjustments[team] = value;
-
-  // Update button highlighting
-  const row = document.getElementById("adjust-" + team.replace(/\s+/g, ""));
-  const buttons = row.querySelectorAll("button");
-  buttons.forEach(btn => btn.classList.remove("active-adjust"));
-
-  if (value === 0) {
-    row.querySelector(".reset-btn").classList.add("active-adjust");
-  } else if (value > 0) {
-    row.querySelector(".plus-btn").classList.add("active-adjust");
-  } else {
-    row.querySelector(".minus-btn").classList.add("active-adjust");
-  }
-
-  calculatePlayoff();
+function getBaseScore(team, outcome) {
+  const entry = scoreChart[team];
+  if (!entry) return 0;
+  return (entry.fixed !== undefined) ? entry.fixed : entry[outcome];
 }
 
-function buildAdjustments() {
+function setAdjustment(team, value) {
+  if ((adjustments[team] || 0) === value) return;
+  adjustments[team] = value;
+
+  const row = document.getElementById("adjust-" + team.replace(/\s+/g, ""));
+  if (row) {
+    const buttons = row.querySelectorAll("button");
+    buttons.forEach(btn => btn.classList.remove("active-adjust"));
+    if (value === 0) {
+      row.querySelector(".reset-btn").classList.add("active-adjust");
+    } else if (value > 0) {
+      row.querySelector(".plus-btn").classList.add("active-adjust");
+    } else {
+      row.querySelector(".minus-btn").classList.add("active-adjust");
+    }
+  }
+
+  // Recompute results but do NOT rebuild adjustments order
+  calculatePlayoff(false);
+}
+
+// Build adjustments UI for an ordered list of ALL teams; preserve adjustment states
+function buildAdjustments(orderedTeams) {
   const container = document.getElementById("adjustments");
-  container.innerHTML = "<h2>Adjustments</h2>";
-  for (let team in scoreChart) {
+  container.innerHTML = "<h2>Personal Adjustments</h2>";
+
+  orderedTeams.forEach(team => {
+    if (!(team in adjustments)) adjustments[team] = 0;
+
     const row = document.createElement("div");
     row.className = "adjust-row";
     row.id = "adjust-" + team.replace(/\s+/g, "");
     row.innerHTML = `
       <button class="minus-btn" onclick="setAdjustment('${team}', -0.05)">-</button>
-      <button class="reset-btn active-adjust" onclick="setAdjustment('${team}', 0)">${team}</button>
+      <button class="reset-btn" onclick="setAdjustment('${team}', 0)">${team}</button>
       <button class="plus-btn" onclick="setAdjustment('${team}', 0.05)">+</button>
     `;
     container.appendChild(row);
-    adjustments[team] = 0; // default
-  }
+
+    const value = adjustments[team] || 0;
+    const minusBtn = row.querySelector(".minus-btn");
+    const resetBtn = row.querySelector(".reset-btn");
+    const plusBtn = row.querySelector(".plus-btn");
+    minusBtn.classList.remove("active-adjust");
+    resetBtn.classList.remove("active-adjust");
+    plusBtn.classList.remove("active-adjust");
+    if (value === 0) {
+      resetBtn.classList.add("active-adjust");
+    } else if (value > 0) {
+      plusBtn.classList.add("active-adjust");
+    } else {
+      minusBtn.classList.add("active-adjust");
+    }
+  });
+
+  lastOrderedTeams = orderedTeams.slice();
 }
 
-function calculatePlayoff() {
+function calculatePlayoff(rebuildAdjustments = true) {
   const bigTen = selections.bigTen;
   const big12 = selections.big12;
   const sec = selections.sec;
@@ -209,9 +267,9 @@ function calculatePlayoff() {
     {conf:"acc", team:acc},
     {conf:"sunBelt", team:sunBelt},
     {conf:"mwc", team:mwc}
-  ];
+  ].filter(c => !!c.team);
 
-  // Champion scores (win outcome)
+  // Champion scores (win outcome with adjustments for ranking field)
   const championWins = conferenceTeams.map(c => ({
     team: c.team,
     score: getScore(c.team, "win"),
@@ -220,14 +278,14 @@ function calculatePlayoff() {
 
   // Top 5 champions qualify
   const qualified = championWins.slice(0,5);
-  const qualifiedTeams = new Set(qualified.map(q => q.team));
+  const qualifiedTeamsSet = new Set(qualified.map(q => q.team));
 
-  // Collect best remaining (loss outcome) for non-qualified
+  // Best remaining pool (loss/fixed) for non-qualified and others
   const bestRemainingByTeam = new Map();
   conferenceTeams.forEach(c => {
     const team = c.team;
     const lossScore = getScore(team, "loss");
-    if (!qualifiedTeams.has(team)) {
+    if (!qualifiedTeamsSet.has(team)) {
       const existing = bestRemainingByTeam.get(team);
       if (!existing || lossScore > existing.score) {
         bestRemainingByTeam.set(team, { team, score: lossScore, champ: false });
@@ -235,9 +293,8 @@ function calculatePlayoff() {
     }
   });
 
-  // Add all other fixed/loss teams
   for (let team in scoreChart) {
-    if (qualifiedTeams.has(team)) continue;
+    if (qualifiedTeamsSet.has(team)) continue;
     const entry = scoreChart[team];
     const score = (entry.fixed !== undefined) ? getScore(team, "fixed") : getScore(team, "loss");
     const existing = bestRemainingByTeam.get(team);
@@ -246,18 +303,16 @@ function calculatePlayoff() {
     }
   }
 
-  // Select top 9 at-large
   const atLarge = Array.from(bestRemainingByTeam.values())
     .sort((a,b)=>b.score-a.score)
     .slice(0,9);
 
-  // Final field: 5 champs + 7 at-large
   const finalTeams = qualified.concat(atLarge.slice(0,7)).sort((a,b)=>b.score-a.score);
   const firstTwoOut = atLarge.slice(7,9);
 
   // Render results
   document.getElementById("results").innerHTML =
-    "<h2>Qualified Teams</h2><ol>" +
+    "<h2>Possible Seeding</h2><ol>" +
     finalTeams.map(t => {
       const conf = scoreChart[t.team]?.conference || "Unknown";
       return "<li class='" + (t.champ ? "champion" : "") + "'>" +
@@ -270,6 +325,29 @@ function calculatePlayoff() {
       return "<li class='firstOut'>" + t.team + " (" + conf + ")</li>";
     }).join("") +
     "</ul>";
+
+  // Determine baseline for ALL teams based on current playoff composition:
+  // - If a team is a champ in finalTeams: use baseline 'win'
+  // - Else: use baseline 'fixed' if fixed exists, otherwise 'loss'
+  const champSet = new Set(finalTeams.filter(t => t.champ).map(t => t.team));
+  const orderedByBaselineNow = Object.keys(scoreChart)
+    .map(team => {
+      const entry = scoreChart[team];
+      const outcome = champSet.has(team)
+        ? "win"
+        : (entry.fixed !== undefined ? "fixed" : "loss");
+      return { team, baseScore: getBaseScore(team, outcome) };
+    })
+    .sort((a,b) => b.baseScore - a.baseScore)
+    .map(x => x.team);
+
+  const orderChanged =
+    lastOrderedTeams.length !== orderedByBaselineNow.length ||
+    orderedByBaselineNow.some((t, i) => lastOrderedTeams[i] !== t);
+
+  if (rebuildAdjustments && orderChanged) {
+    buildAdjustments(orderedByBaselineNow);
+  }
 }
 </script>
 </body>
