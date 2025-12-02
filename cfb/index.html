@@ -66,43 +66,43 @@
   <div class="container">
     <!-- Column 1: Games -->
     <div class="column">
-      <div class="game">Big Ten Championship:
+      <div class="game">Big Ten Champion:
         <div class="buttons">
           <button id="btn-indiana" class="choice" onclick="setChoice('bigTen','Indiana')">Indiana</button>
           <button id="btn-ohio" class="choice" onclick="setChoice('bigTen','Ohio State')">Ohio State</button>
         </div>
       </div>
-      <div class="game">Big 12 Championship:
+      <div class="game">Big 12 Champion:
         <div class="buttons">
           <button id="btn-tt" class="choice" onclick="setChoice('big12','Texas Tech')">Texas Tech</button>
           <button id="btn-byu" class="choice" onclick="setChoice('big12','BYU')">BYU</button>
         </div>
       </div>
-      <div class="game">SEC Championship:
+      <div class="game">SEC Champion:
         <div class="buttons">
           <button id="btn-bama" class="choice" onclick="setChoice('sec','Alabama')">Alabama</button>
           <button id="btn-uga" class="choice" onclick="setChoice('sec','Georgia')">Georgia</button>
         </div>
       </div>
-      <div class="game">ACC Championship:
+      <div class="game">ACC Champion:
         <div class="buttons">
           <button id="btn-virginia" class="choice" onclick="setChoice('acc','Virginia')">Virginia</button>
           <button id="btn-duke" class="choice" onclick="setChoice('acc','Duke')">Duke</button>
         </div>
       </div>
-      <div class="game">American Championship:
+      <div class="game">American Champion:
         <div class="buttons">
           <button id="btn-nt" class="choice" onclick="setChoice('american','North Texas')">North Texas</button>
           <button id="btn-tulane" class="choice" onclick="setChoice('american','Tulane')">Tulane</button>
         </div>
       </div>
-      <div class="game">Sun Belt Championship:
+      <div class="game">Sun Belt Champion:
         <div class="buttons">
           <button id="btn-jmu" class="choice" onclick="setChoice('sunBelt','JMU')">JMU</button>
           <button id="btn-troy" class="choice" onclick="setChoice('sunBelt','Troy')">Troy</button>
         </div>
       </div>
-      <div class="game">Mountain West Championship:
+      <div class="game">Mountain West Champion:
         <div class="buttons">
           <button id="btn-unlv" class="choice" onclick="setChoice('mwc','UNLV')">UNLV</button>
           <button id="btn-boise" class="choice" onclick="setChoice('mwc','Boise State')">Boise State</button>
@@ -313,7 +313,7 @@ function calculatePlayoff(rebuildAdjustments = true) {
 
   // Render results
   document.getElementById("results").innerHTML =
-    "<h2>Possible Seeding</h2><ol>" +
+    "<h2>Your Seeding</h2><ol>" +
     finalTeams.map(t => {
       const conf = scoreChart[t.team]?.conference || "Unknown";
       return "<li class='" + (t.champ ? "champion" : "") + "'>" +
