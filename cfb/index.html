@@ -128,24 +128,24 @@ let lastOrderedTeams = []; // cache last rendered order for adjustments
 
 // Score chart values with conference info
 const scoreChart = {
-  "Ohio State": {win:1980, loss:1620, conference:"Big Ten"},
-  "Indiana": {win:1925, loss:1575, conference:"Big Ten"},
-  "Oregon": {fixed:1353, conference:"Big Ten"},
-  "Georgia": {win:1582, loss:1240, conference:"SEC"},
-  "Ole Miss": {fixed:1190, conference:"SEC"},
-  "Texas A&M": {fixed:1178, conference:"SEC"},
-  "Texas Tech": {win:1430, loss:1139, conference:"Big 12"},
-  "Oklahoma": {fixed:1106, conference:"SEC"},
-  "Notre Dame": {fixed:1061, conference:"Independent"},
-  "Alabama": {win:1150, loss:1020, conference:"SEC"},
-  "BYU": {win:1036, loss:990, conference:"Big 12"},
-  "Miami": {fixed:960, conference:"ACC"},
-  "Virginia": {win:674, loss:552, conference:"ACC"},
-  "North Texas": {win:407, loss:333, conference:"American"},
-  "Tulane": {win:396, loss:324, conference:"American"},
-  "JMU": {win:392, loss:320, conference:"Sun Belt"},
-  "UNLV": {win:275, loss:225, conference:"Mountain West"},
-  "Duke": {win:264, loss:216, conference:"ACC"}
+  "Ohio State": { win:1980, loss:1620, conference:"Big Ten", record:{wins:12, losses:0, winsBase:12, lossesBase:0} },
+  "Indiana": { win:1925, loss:1575, conference:"Big Ten", record:{wins:12, losses:0, winsBase:12, lossesBase:0} },
+  "Oregon": { fixed:1353, conference:"Big Ten", record:{wins:11, losses:1, winsBase:11, lossesBase:1} },
+  "Georgia": { win:1582, loss:1240, conference:"SEC", record:{wins:11, losses:1, winsBase:11, lossesBase:1} },
+  "Ole Miss": { fixed:1190, conference:"SEC", record:{wins:11, losses:1, winsBase:11, lossesBase:1} },
+  "Texas A&M": { fixed:1178, conference:"SEC", record:{wins:11, losses:1, winsBase:11, lossesBase:1} },
+  "Texas Tech": { win:1430, loss:1139, conference:"Big 12", record:{wins:11, losses:1, winsBase:11, lossesBase:1} },
+  "Oklahoma": { fixed:1106, conference:"SEC", record:{wins:10, losses:2, winsBase:10, lossesBase:2} },
+  "Notre Dame": { fixed:1061, conference:"Independent", record:{wins:10, losses:2, winsBase:10, lossesBase:2} },
+  "Alabama": { win:1150, loss:1020, conference:"SEC", record:{wins:10, losses:2, winsBase:10, lossesBase:2} },
+  "BYU": { win:1036, loss:990, conference:"Big 12", record:{wins:11, losses:1, winsBase:11, lossesBase:1} },
+  "Miami": { fixed:960, conference:"ACC", record:{wins:10, losses:2, winsBase:10, lossesBase:2} },
+  "Virginia": { win:674, loss:552, conference:"ACC", record:{wins:10, losses:2, winsBase:10, lossesBase:2} },
+  "North Texas": { win:407, loss:333, conference:"American", record:{wins:11, losses:1, winsBase:11, lossesBase:1} },
+  "Tulane": { win:396, loss:324, conference:"American", record:{wins:10, losses:2, winsBase:10, lossesBase:2} },
+  "JMU": { win:392, loss:320, conference:"Sun Belt", record:{wins:11, losses:1, winsBase:11, lossesBase:1} },
+  "UNLV": { win:275, loss:225, conference:"Mountain West", record:{wins:10, losses:2, winsBase:10, lossesBase:2} },
+  "Duke": { win:264, loss:216, conference:"ACC", record:{wins:7, losses:5, winsBase:7, lossesBase:5} }
 };
 
 function setChoice(game, team) {
@@ -251,7 +251,48 @@ function buildAdjustments(orderedTeams) {
   lastOrderedTeams = orderedTeams.slice();
 }
 
+function updateConferenceRecords() {
+  // Reset each team back to its baseline record
+  for (let team in scoreChart) {
+    const rec = scoreChart[team].record;
+    if (rec) {
+      rec.wins = rec.winsBase;
+      rec.losses = rec.lossesBase;
+    }
+  }
+
+  // Define the conference championship matchups
+  const conferenceGames = {
+    bigTen: ["Ohio State", "Indiana"],
+    big12: ["Texas Tech", "BYU"],
+    sec: ["Georgia", "Alabama"],
+    american: ["North Texas", "Tulane"],
+    acc: ["Virginia", "Duke"],
+    sunBelt: ["JMU", "Troy"],       // add Troy if you want to track them
+    mwc: ["UNLV", "Boise State"]    // add Boise State if you want to track them
+  };
+
+  // Apply win/loss increments based on selections
+  for (let game in conferenceGames) {
+    const matchup = conferenceGames[game];
+    const selectedTeam = selections[game];
+    if (!selectedTeam || !matchup.includes(selectedTeam)) continue;
+
+    // Winner gets +1 win, the other team gets +1 loss
+    if (scoreChart[selectedTeam] && scoreChart[selectedTeam].record) {
+      scoreChart[selectedTeam].record.wins += 1;
+    }
+    matchup.forEach(team => {
+      if (team !== selectedTeam && scoreChart[team] && scoreChart[team].record) {
+        scoreChart[team].record.losses += 1;
+      }
+    });
+  }
+}
+
 function calculatePlayoff(rebuildAdjustments = true) {
+  updateConferenceRecords();
+
   const bigTen = selections.bigTen;
   const big12 = selections.big12;
   const sec = selections.sec;
@@ -311,19 +352,23 @@ function calculatePlayoff(rebuildAdjustments = true) {
   const finalTeams = qualified.concat(atLarge.slice(0,7)).sort((a,b)=>b.score-a.score);
   const firstTwoOut = atLarge.slice(7,9);
 
-  // Render results
+  // Render results with record included
   document.getElementById("results").innerHTML =
     "<h2>Your Seeding</h2><ol>" +
     finalTeams.map(t => {
       const conf = scoreChart[t.team]?.conference || "Unknown";
+      const rec = scoreChart[t.team]?.record;
+      const recordText = rec ? ` [${rec.wins}-${rec.losses}]` : "";
       return "<li class='" + (t.champ ? "champion" : "") + "'>" +
-        t.team + " (" + conf + ")</li>";
+        t.team + " (" + conf + ")" + recordText + "</li>";
     }).join("") +
     "</ol>" +
     "<h3>First Two Out</h3><ul>" +
     firstTwoOut.map(t => {
       const conf = scoreChart[t.team]?.conference || "Unknown";
-      return "<li class='firstOut'>" + t.team + " (" + conf + ")</li>";
+      const rec = scoreChart[t.team]?.record;
+      const recordText = rec ? ` [${rec.wins}-${rec.losses}]` : "";
+      return "<li class='firstOut'>" + t.team + " (" + conf + ")" + recordText + "</li>";
     }).join("") +
     "</ul>";
 
