@@ -68,8 +68,8 @@
     <div class="column">
       <div class="game">Big Ten Champion:
         <div class="buttons">
-          <button id="btn-indiana" class="choice" onclick="setChoice('bigTen','Indiana')">Indiana</button>
           <button id="btn-ohio" class="choice" onclick="setChoice('bigTen','Ohio State')">Ohio State</button>
+          <button id="btn-indiana" class="choice" onclick="setChoice('bigTen','Indiana')">Indiana</button>
         </div>
       </div>
       <div class="game">Big 12 Champion:
@@ -80,8 +80,8 @@
       </div>
       <div class="game">SEC Champion:
         <div class="buttons">
-          <button id="btn-bama" class="choice" onclick="setChoice('sec','Alabama')">Alabama</button>
           <button id="btn-uga" class="choice" onclick="setChoice('sec','Georgia')">Georgia</button>
+          <button id="btn-bama" class="choice" onclick="setChoice('sec','Alabama')">Alabama</button>
         </div>
       </div>
       <div class="game">ACC Champion:
@@ -104,8 +104,8 @@
       </div>
       <div class="game">Mountain West Champion:
         <div class="buttons">
-          <button id="btn-unlv" class="choice" onclick="setChoice('mwc','UNLV')">UNLV</button>
           <button id="btn-boise" class="choice" onclick="setChoice('mwc','Boise State')">Boise State</button>
+          <button id="btn-unlv" class="choice" onclick="setChoice('mwc','UNLV')">UNLV</button>
         </div>
       </div>
     </div>
@@ -163,13 +163,13 @@ function setChoice(game, team) {
 
 // Default favorites
 const defaultFavorites = {
-  bigTen: "Indiana",
+  bigTen: "Ohio State",
   big12: "Texas Tech",
-  sec: "Alabama",
+  sec: "Georgia",
   american: "North Texas",
   acc: "Virginia",
   sunBelt: "JMU",
-  mwc: "UNLV"
+  mwc: "Boise State"
 };
 
 window.onload = () => {
