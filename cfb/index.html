@@ -279,7 +279,9 @@ function updateConferenceRecords() {
     if (!selectedTeam || !matchup.includes(selectedTeam)) continue;
 
     // Winner gets +1 win, the other team gets +1 loss
-    scoreChart[selectedTeam].record.wins += 1;
+    if (scoreChart[selectedTeam] && scoreChart[selectedTeam].record) {
+      scoreChart[selectedTeam].record.wins += 1;
+    }
     matchup.forEach(team => {
       if (team !== selectedTeam && scoreChart[team] && scoreChart[team].record) {
         scoreChart[team].record.losses += 1;
