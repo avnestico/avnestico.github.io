@@ -211,12 +211,13 @@ d3Script.onload = () => {
       tooltip.style("opacity", 0);
     });
 
-    // --- CLICK ANYWHERE MOVES DOT ---
-    svg.on("mousedown", (ev) => {
+    // --- CLICK / TOUCHSTART ANYWHERE MOVES DOT ---
+    svg.on("mousedown touchstart", (ev) => {
+      const point = ev.touches ? ev.touches[0] : ev;
       const bb = svg.node().getBoundingClientRect();
 
       const scale = width / bb.width;
-      const svgPx = (ev.clientX - bb.left) * scale;
+      const svgPx = (point.clientX - bb.left) * scale;
 
       const localPx = svgPx - margin.left;
       const clampedPx = Math.max(0, Math.min(innerWidth, localPx));
@@ -244,8 +245,8 @@ d3Script.onload = () => {
 
       tooltip
         .style("opacity", 1)
-        .style("left", (ev.pageX + 12) + "px")
-        .style("top", (ev.pageY - 12) + "px")
+        .style("left", (point.pageX + 12) + "px")
+        .style("top", (point.pageY - 12) + "px")
         .text(`${clampedEntrants} Entrants: ${Math.round(currentY * 100)}%`);
 
       document.getElementById("entrants").value = clampedEntrants;
@@ -257,13 +258,14 @@ d3Script.onload = () => {
     // --- DRAG LOGIC ---
     let dragging = false;
 
-    window.addEventListener("mousemove", (ev) => {
+    function dragMove(ev) {
       if (!dragging) return;
 
+      const point = ev.touches ? ev.touches[0] : ev;
       const bb = svg.node().getBoundingClientRect();
 
       const scale = width / bb.width;
-      const svgPx = (ev.clientX - bb.left) * scale;
+      const svgPx = (point.clientX - bb.left) * scale;
 
       const localPx = svgPx - margin.left;
       const clampedPx = Math.max(0, Math.min(innerWidth, localPx));
@@ -291,15 +293,18 @@ d3Script.onload = () => {
 
       tooltip
         .style("opacity", 1)
-        .style("left", (ev.pageX + 12) + "px")
-        .style("top", (ev.pageY - 12) + "px")
+        .style("left", (point.pageX + 12) + "px")
+        .style("top", (point.pageY - 12) + "px")
         .text(`${clampedEntrants} Entrants: ${Math.round(currentY * 100)}%`);
 
       document.getElementById("entrants").value = clampedEntrants;
       document.getElementById("entrants_slider").value = clampedEntrants;
-    });
+    }
 
-    window.addEventListener("mouseup", () => {
+    window.addEventListener("mousemove", dragMove);
+    window.addEventListener("touchmove", dragMove);
+
+    function endDrag() {
       if (!dragging) return;
       dragging = false;
 
@@ -310,7 +315,10 @@ d3Script.onload = () => {
       } else if (window.render) {
         window.render();
       }
-    });
+    }
+
+    window.addEventListener("mouseup", endDrag);
+    window.addEventListener("touchend", endDrag);
   };
 
   if (window.render) {
