@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Pokemon TCG Swiss Simulator: X-1-2 Cut Rate</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  .container {
+    display: flex;
+    max-width: 1280px;
+    margin: auto;
+    padding: 10px;
+    gap: 20px;
+  }
+
+  .inputs {
+    width: 300px;
+    padding: 10px;
+  }
+
+  .inputs label {
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .inputs input {
+    width: 90%;
+    padding: 6px;
+    font-size: 16px;
+  }
+
+  #yhat_value {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .chart-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .chart {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    justify-content: center;
+    user-select: none;
+  }
+
+  .chart > svg {
+    width: 100%;
+  }
+
+  #plot {
+    width: 100%;
+  }
+
+  #chart_title {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 950px) {
+    .container {
+      flex-direction: column;
+    }
+    .chart-wrapper {
+      width: 100%;
+    }
+    .chart {
+      justify-content: center;
+    }
+    .inputs {
+      width: 100%;
+      border-right: none;
+    }
+    body { font-size: 18px; }
+    h1 { font-size: 26px; }
+
+    .inputs {
+      padding: 20px;
+    }
+
+    .inputs label {
+      font-size: 18px;
+    }
+
+    .inputs input {
+      font-size: 18px;
+      padding: 10px;
+    }
+
+    #chart_title {
+      font-size: 24px;
+    }
+
+    #yhat_value {
+      font-size: 24px;
+    }
+
+    .container {
+      gap: 40px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="inputs">
+    <label>Rounds:
+      <input id="rounds" type="number" min="9" max="14" step="1" value="12">
+    </label>
+
+    <label>Entrants:
+      <input id="entrants" type="number" min="65" max="4096" step="1" value="800">
+    </label>
+
+    <label>Tie Rate (%):
+      <input id="tie_rate" type="number" min="10" max="15" step="1" value="15">
+    </label>
+
+    <label>Day 1 X-2-0 Tie Rate (%):
+      <input id="day1_tie_rate" type="number" min="60" max="90" step="1" value="75">
+    </label>
+
+    <div id="yhat_value"></div>
+  </div>
+
+  <div class="chart-wrapper">
+    <div id="chart_title">X-1-2 Cut Probability Simulation</div>
+
+    <div class="chart">
+      <div id="plot"></div>
+    </div>
+  </div>
+
+</div>
+
+
+<script>
+
+const summary_delta_csv = `
+CeilingLogEntrants,TieRate,Delta
+7,0.15,0.9689
+7,0.14,0.9480
+7,0.13,0.9309
+7,0.12,0.9129
+7,0.11,0.8934
+7,0.1,0.8716
+8,0.15,0.8525
+8,0.14,0.8240
+8,0.13,0.8021
+8,0.12,0.7695
+8,0.11,0.7435
+8,0.1,0.7228
+9,0.15,0.7371
+9,0.14,0.6999
+9,0.13,0.6605
+9,0.12,0.6270
+9,0.11,0.5857
+9,0.1,0.5553
+10,0.15,0.6454
+10,0.14,0.5942
+10,0.13,0.5478
+10,0.12,0.4985
+10,0.11,0.4510
+10,0.1,0.4077
+11,0.15,0.5819
+11,0.14,0.5195
+11,0.13,0.4532
+11,0.12,0.3899
+11,0.11,0.3326
+11,0.1,0.2846
+12,0.15,0.5350
+12,0.14,0.4600
+12,0.13,0.3794
+12,0.12,0.3079
+12,0.11,0.2409
+12,0.1,0.1701
+`;
+
+const summary_shift_csv = `
+CeilingLogEntrants,DeltaShift
+7,0.105
+8,0.100
+9,0.096
+10,0.080
+11,0.066
+12,0.053
+`;
+
+const summary_k_csv = `
+CeilingLogEntrants,K
+7,11.8989
+8,11.3629
+9,11.3520
+10,10.9797
+11,10.6534
+12,10.4572
+`;
+</script>
+
+<script>
+function parseCSV(text) {
+  const lines = text.trim().split("\n");
+  const headers = lines[0].split(",");
+  return lines.slice(1).map(line => {
+    const cols = line.split(",");
+    const obj = {};
+    headers.forEach((h, i) => {
+      const v = cols[i];
+      obj[h] = isNaN(v) ? v : Number(v);
+    });
+    return obj;
+  });
+}
+
+const summary_delta = parseCSV(summary_delta_csv);
+const summary_shift = parseCSV(summary_shift_csv);
+const summary_k     = parseCSV(summary_k_csv);
+
+function lookup(table, filters, returnCol) {
+  const row = table.find(row =>
+    Object.entries(filters).every(([col, val]) => row[col] == val)
+  );
+  if (!row) return undefined;
+  return row[returnCol];
+}
+
+const BASE_DAY1_TIE_RATE = 0.75;
+
+function get_base_delta(ceilLogEntrants, tieRateFloat) {
+  return lookup(summary_delta,
+    { CeilingLogEntrants: ceilLogEntrants, TieRate: tieRateFloat },
+    "Delta"
+  );
+}
+
+function get_delta_shift(ceilLogEntrants, day1TieRatePercent) {
+  const baseShift = lookup(summary_shift,
+    { CeilingLogEntrants: ceilLogEntrants },
+    "DeltaShift"
+  );
+  return (day1TieRatePercent/100 - BASE_DAY1_TIE_RATE) * baseShift;
+}
+
+function get_delta(ceilLogEntrants, tieRateFloat, day1TieRatePercent) {
+  const base = get_base_delta(ceilLogEntrants, tieRateFloat);
+  const shift = get_delta_shift(ceilLogEntrants, day1TieRatePercent);
+  return base + shift;
+}
+
+function get_k(ceilLogEntrants) {
+  return lookup(summary_k,
+    { CeilingLogEntrants: ceilLogEntrants },
+    "K"
+  );
+}
+
+function yhat(x, k, delta) {
+  return 1 / (1 + Math.exp(-k * (x - delta)));
+}
+
+function computeCurve(entrants, tieRatePercent, day1TieRatePercent) {
+  const tieRateFloat = tieRatePercent / 100;
+  const logEntrants = Math.log2(entrants);
+  const ceilLog = Math.ceil(logEntrants);
+  const delta = get_delta(ceilLog, tieRateFloat, day1TieRatePercent);
+  const k = get_k(ceilLog);
+
+  const minEnt = Math.pow(2, ceilLog - 1) + 1;
+  const maxEnt = Math.pow(2, ceilLog);
+
+  const xs = [];
+  const ys = [];
+
+  for (let ent = minEnt; ent <= maxEnt; ent++) {
+    const x = Math.log2(ent) - ceilLog + 1;
+    xs.push(ent);
+    ys.push(yhat(x, k, delta));
+  }
+
+  const mantissa = logEntrants - ceilLog + 1;
+  const actualY = yhat(mantissa, k, delta);
+
+  return { xs, ys, actualX: entrants, actualY };
+}
+
+// Entrants ↔ Rounds coupling
+function entrantsToRounds(ent) {
+  return Math.ceil(Math.log2(ent)) + 2;
+}
+
+function roundsToEntrants(rounds, mantissa) {
+  const ceilLog = rounds - 2;
+  return Math.round(Math.pow(2, ceilLog - 1 + mantissa));
+}
+
+// Sync helpers
+function syncRoundsFromEntrants() {
+  const ent = +document.getElementById("entrants").value;
+  const rounds = entrantsToRounds(ent);
+  document.getElementById("rounds").value = rounds;
+}
+
+function syncEntrantsFromRounds() {
+  const rounds = +document.getElementById("rounds").value;
+  const ent = +document.getElementById("entrants").value;
+  const logEnt = Math.log2(ent);
+  const ceilLog = Math.ceil(logEnt);
+  const mantissa = logEnt - ceilLog + 1;
+  const newEnt = roundsToEntrants(rounds, mantissa);
+  document.getElementById("entrants").value = newEnt;
+}
+
+// Expose a helper for D3 drag to use
+window.updateFromEntrants = function() {
+  syncRoundsFromEntrants();
+  if (window.render) window.render();
+};
+
+// Input listeners (index owns coupling)
+document.getElementById("entrants").addEventListener("input", () => {
+  syncRoundsFromEntrants();
+  if (window.render) window.render();
+});
+
+document.getElementById("rounds").addEventListener("input", () => {
+  syncEntrantsFromRounds();
+  if (window.render) window.render();
+});
+
+["tie_rate", "day1_tie_rate"].forEach(id => {
+  document.getElementById(id).addEventListener("input", () => {
+    if (window.render) window.render();
+  });
+});
+
+// Initial sync; D3 will render once it loads
+syncRoundsFromEntrants();
+</script>
+
+<script src="d3_render.js"></script>
+</body>
+</html>
