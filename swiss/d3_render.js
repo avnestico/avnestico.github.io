@@ -15,7 +15,8 @@ d3Script.onload = () => {
     .style("border-radius", "4px")
     .style("font-size", "14px")
     .style("pointer-events", "none")
-    .style("opacity", 0);
+    .style("opacity", 0)
+    .style("white-space", "nowrap");   // <── NEW: prevent wrapping
 
   window.render = function() {
     const entrants = +document.getElementById("entrants").value;
@@ -243,11 +244,26 @@ d3Script.onload = () => {
       document.getElementById("yhat_value").innerText =
         `${Math.round(currentY * 100)}%`;
 
+      // --- DOT-ANCHORED TOOLTIP WITH FLIP LOGIC ---
+      tooltip.text(`${clampedEntrants} Entrants: ${Math.round(currentY * 100)}%`);
+
+      const dotBB = dot.node().getBoundingClientRect();
+      const plotBB = document.getElementById("plot").getBoundingClientRect();
+      const tooltipWidth = tooltip.node().getBoundingClientRect().width;
+
+      let left = dotBB.right + 12;
+      let textAlign = "left";
+
+      if (left + tooltipWidth > plotBB.right) {
+        left = dotBB.left - tooltipWidth - 12;
+        textAlign = "right";
+      }
+
       tooltip
         .style("opacity", 1)
-        .style("left", (point.pageX + 12) + "px")
-        .style("top", (point.pageY - 12) + "px")
-        .text(`${clampedEntrants} Entrants: ${Math.round(currentY * 100)}%`);
+        .style("left", left + "px")
+        .style("top", (dotBB.top - 12) + "px")
+        .style("text-align", textAlign);
 
       document.getElementById("entrants").value = clampedEntrants;
       document.getElementById("entrants_slider").value = clampedEntrants;
@@ -291,11 +307,26 @@ d3Script.onload = () => {
       document.getElementById("yhat_value").innerText =
         `${Math.round(currentY * 100)}%`;
 
+      // --- DOT-ANCHORED TOOLTIP WITH FLIP LOGIC ---
+      tooltip.text(`${clampedEntrants} Entrants: ${Math.round(currentY * 100)}%`);
+
+      const dotBB = dot.node().getBoundingClientRect();
+      const plotBB = document.getElementById("plot").getBoundingClientRect();
+      const tooltipWidth = tooltip.node().getBoundingClientRect().width;
+
+      let left = dotBB.right + 12;
+      let textAlign = "left";
+
+      if (left + tooltipWidth > plotBB.right) {
+        left = dotBB.left - tooltipWidth - 12;
+        textAlign = "right";
+      }
+
       tooltip
         .style("opacity", 1)
-        .style("left", (point.pageX + 12) + "px")
-        .style("top", (point.pageY - 12) + "px")
-        .text(`${clampedEntrants} Entrants: ${Math.round(currentY * 100)}%`);
+        .style("left", left + "px")
+        .style("top", (dotBB.top - 12) + "px")
+        .style("text-align", textAlign);
 
       document.getElementById("entrants").value = clampedEntrants;
       document.getElementById("entrants_slider").value = clampedEntrants;
