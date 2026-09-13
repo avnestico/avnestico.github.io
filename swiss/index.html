@@ -6,28 +6,116 @@
 <title>Pokemon TCG Swiss Simulator: X-1-2 Cut Rate</title>
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-  }
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- MOBILE FIRST (stacked) --- */
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Mobile order: title → inputs → chart */
+.item-title { order: 1; }
+.item-inputs { order: 2; }
+.item-chart { order: 3; }
+
+.inputs {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.inputs label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.inputs input {
+  width: 100%;
+  padding: 10px;
+  font-size: 18px;
+  box-sizing: border-box;
+}
+
+.inputs input[type="range"] {
+  padding: 0;
+}
+
+#yhat_value {
+  margin-top: 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+#yhat_value_label {
+  font-size: 24px;
+  display: block;
+  text-align: center;
+}
+
+.chart-wrapper {
+  width: 100%;
+}
+
+.chart {
+  display: flex;
+  justify-content: center;
+  user-select: none;
+}
+
+.chart > svg {
+  width: 100%;
+}
+
+#plot {
+  width: 100%;
+}
+
+#chart_title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/* --- DESKTOP GRID LAYOUT --- */
+@media (min-width: 950px) {
 
   .container {
-    display: flex;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-areas:
+      "inputs title"
+      "inputs chart";
+    gap: 20px;
     max-width: 1280px;
     margin: auto;
     padding: 10px;
-    gap: 20px;
   }
 
-  .inputs {
+  .item-inputs {
+    grid-area: inputs;
     width: 300px;
     padding: 10px;
   }
 
-  .inputs label {
-    display: block;
-    margin-bottom: 12px;
+  .item-title {
+    grid-area: title;
+    font-size: 18px;
+  }
+
+  .item-chart {
+    grid-area: chart;
+  }
+
+  .chart {
+    justify-content: center;
   }
 
   .inputs input {
@@ -36,97 +124,11 @@
     font-size: 16px;
   }
 
-  #yhat_value {
-    margin-top: 20px;
+  #yhat_value, #yhat_value_label {
     font-size: 20px;
-    font-weight: bold;
+    text-align: left;
   }
-
-  .chart-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .chart {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    justify-content: center;
-    user-select: none;
-  }
-
-  .chart > svg {
-    width: 100%;
-  }
-
-  #plot {
-    width: 100%;
-  }
-
-  #chart_title {
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-
-  #rounds_display,
-  #tie_rate_display,
-  #day1_tie_rate_display {
-
-  }
-
-  @media (max-width: 950px) {
-    .container {
-      flex-direction: column;
-    }
-    .chart-wrapper {
-      width: 100%;
-    }
-    .chart {
-      justify-content: center;
-    }
-    .inputs {
-      width: 100%;
-      box-sizing: border-box;
-    }
-    body { font-size: 18px; }
-    h1 { font-size: 26px; }
-
-    .inputs {
-      padding: 20px;
-    }
-
-    .inputs label {
-      font-size: 18px;
-    }
-
-    .inputs input {
-      font-size: 18px;
-      padding: 10px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .inputs input[type="range"] {
-      width: 100%;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    #chart_title {
-      font-size: 24px;
-    }
-
-    #yhat_value {
-      font-size: 24px;
-    }
-
-    .container {
-      gap: 40px;
-    }
-  }
+}
 </style>
 </head>
 
@@ -134,39 +136,45 @@
 
 <div class="container">
 
-<div class="inputs">
-  <label>Rounds:
-    <span id="rounds_display">12</span>
-    <input id="rounds" type="range" min="9" max="14" step="1" value="12">
-  </label>
+  <div id="chart_title" class="item-title">
+    X-1-2 Cut Probability Simulation
+  </div>
 
-  <label>Entrants:
-    <input id="entrants" type="number" min="65" max="4096" step="1" value="800">
-    <input id="entrants_slider" type="range" min="65" max="4096" step="1" value="800">
-  </label>
+  <div class="inputs item-inputs">
+    <label>Rounds:
+      <span id="rounds_display">12</span>
+      <input id="rounds" type="range" min="9" max="14" step="1" value="12">
+    </label>
 
-  <label>Tie Rate:
-    <span id="tie_rate_display">15</span>%
-    <input id="tie_rate" type="range" min="10" max="15" step="1" value="15">
-  </label>
+    <label>Entrants:
+      <input id="entrants" type="number" min="65" max="4096" step="1" value="800">
+      <input id="entrants_slider" type="range" min="65" max="4096" step="1" value="800">
+    </label>
 
-  <label>Day 1 X-2-0 Tie Rate:
-    <span id="day1_tie_rate_display">75</span>%
-    <input id="day1_tie_rate" type="range" min="60" max="90" step="1" value="75">
-  </label>
+    <label>Tie Rate:
+      <span id="tie_rate_display">15</span>%
+      <input id="tie_rate" type="range" min="10" max="15" step="1" value="15">
+    </label>
 
-  <div id="yhat_value"></div>
-</div>
+    <label>Day 1 X-2-0 Tie Rate:
+      <span id="day1_tie_rate_display">75</span>%
+      <input id="day1_tie_rate" type="range" min="60" max="90" step="1" value="75">
+    </label>
 
-  <div class="chart-wrapper">
-    <div id="chart_title">X-1-2 Cut Probability Simulation</div>
+    <span id="yhat_value_label">
+      X-1-2 Cut Probability:
+      <span id="yhat_value"></span>
+    </span>
+  </div>
 
+  <div class="chart-wrapper item-chart">
     <div class="chart">
       <div id="plot"></div>
     </div>
   </div>
 
 </div>
+
 
 <script>
 

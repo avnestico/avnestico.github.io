@@ -26,7 +26,7 @@ d3Script.onload = () => {
       computeCurve(entrants, tieRatePercent, day1TieRatePercent);
 
     document.getElementById("yhat_value").innerText =
-      `X-1-2 Cut Probability: ${(actualY * 100).toFixed(0)}%`;
+      `${(actualY * 100).toFixed(0)}%`;
 
     d3.select("#plot").selectAll("*").remove();
 
@@ -240,7 +240,7 @@ d3Script.onload = () => {
       dot.attr("cy", yScale(currentY * 100));
 
       document.getElementById("yhat_value").innerText =
-        `X-1-2 Cut Probability: ${Math.round(currentY * 100)}%`;
+        `${Math.round(currentY * 100)}%`;
 
       tooltip
         .style("opacity", 1)
@@ -286,7 +286,7 @@ d3Script.onload = () => {
       dot.attr("cy", yScale(currentY * 100));
 
       document.getElementById("yhat_value").innerText =
-        `X-1-2 Cut Probability: ${Math.round(currentY * 100)}%`;
+        `${Math.round(currentY * 100)}%`;
 
       tooltip
         .style("opacity", 1)
