@@ -249,6 +249,7 @@ d3Script.onload = () => {
         .text(`${clampedEntrants} Entrants: ${Math.round(currentY * 100)}%`);
 
       document.getElementById("entrants").value = clampedEntrants;
+      document.getElementById("entrants_slider").value = clampedEntrants;
 
       dragging = true;
     });
@@ -295,6 +296,7 @@ d3Script.onload = () => {
         .text(`${clampedEntrants} Entrants: ${Math.round(currentY * 100)}%`);
 
       document.getElementById("entrants").value = clampedEntrants;
+      document.getElementById("entrants_slider").value = clampedEntrants;
     });
 
     window.addEventListener("mouseup", () => {
