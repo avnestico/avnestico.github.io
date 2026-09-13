@@ -71,6 +71,12 @@
     margin-bottom: 20px;
   }
 
+  #rounds_display,
+  #tie_rate_display,
+  #day1_tie_rate_display {
+
+  }
+
   @media (max-width: 950px) {
     .container {
       flex-direction: column;
@@ -83,7 +89,7 @@
     }
     .inputs {
       width: 100%;
-      border-right: none;
+      box-sizing: border-box;
     }
     body { font-size: 18px; }
     h1 { font-size: 26px; }
@@ -99,6 +105,8 @@
     .inputs input {
       font-size: 18px;
       padding: 10px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     #chart_title {
@@ -120,25 +128,29 @@
 
 <div class="container">
 
-  <div class="inputs">
-    <label>Rounds:
-      <input id="rounds" type="number" min="9" max="14" step="1" value="12">
-    </label>
+<div class="inputs">
+  <label>Rounds:
+    <span id="rounds_display">12</span>
+    <input id="rounds" type="range" min="9" max="14" step="1" value="12">
+  </label>
 
-    <label>Entrants:
-      <input id="entrants" type="number" min="65" max="4096" step="1" value="800">
-    </label>
+  <label>Entrants:
+    <input id="entrants" type="number" min="65" max="4096" step="1" value="800">
+    <input id="entrants_slider" type="range" min="65" max="4096" step="1" value="800">
+  </label>
 
-    <label>Tie Rate (%):
-      <input id="tie_rate" type="number" min="10" max="15" step="1" value="15">
-    </label>
+  <label>Tie Rate:
+    <span id="tie_rate_display">15</span>%
+    <input id="tie_rate" type="range" min="10" max="15" step="1" value="15">
+  </label>
 
-    <label>Day 1 X-2-0 Tie Rate (%):
-      <input id="day1_tie_rate" type="number" min="60" max="90" step="1" value="75">
-    </label>
+  <label>Day 1 X-2-0 Tie Rate:
+    <span id="day1_tie_rate_display">75</span>%
+    <input id="day1_tie_rate" type="range" min="60" max="90" step="1" value="75">
+  </label>
 
-    <div id="yhat_value"></div>
-  </div>
+  <div id="yhat_value"></div>
+</div>
 
   <div class="chart-wrapper">
     <div id="chart_title">X-1-2 Cut Probability Simulation</div>
@@ -149,7 +161,6 @@
   </div>
 
 </div>
-
 
 <script>
 
@@ -300,7 +311,6 @@ function computeCurve(entrants, tieRatePercent, day1TieRatePercent) {
   return { xs, ys, actualX: entrants, actualY };
 }
 
-// Entrants ↔ Rounds coupling
 function entrantsToRounds(ent) {
   return Math.ceil(Math.log2(ent)) + 2;
 }
@@ -310,49 +320,161 @@ function roundsToEntrants(rounds, mantissa) {
   return Math.round(Math.pow(2, ceilLog - 1 + mantissa));
 }
 
-// Sync helpers
-function syncRoundsFromEntrants() {
-  const ent = +document.getElementById("entrants").value;
-  const rounds = entrantsToRounds(ent);
-  document.getElementById("rounds").value = rounds;
-}
-
-function syncEntrantsFromRounds() {
-  const rounds = +document.getElementById("rounds").value;
-  const ent = +document.getElementById("entrants").value;
-  const logEnt = Math.log2(ent);
+function getMantissa(ent) {
+  const logEnt  = Math.log2(ent);
   const ceilLog = Math.ceil(logEnt);
-  const mantissa = logEnt - ceilLog + 1;
-  const newEnt = roundsToEntrants(rounds, mantissa);
-  document.getElementById("entrants").value = newEnt;
+  return logEnt - ceilLog + 1;
 }
 
-// Expose a helper for D3 drag to use
+function getEntrantBoundsForRounds(rounds) {
+  const ceilLog = rounds - 2;
+  const min = Math.pow(2, ceilLog - 1) + 1;
+  const max = Math.pow(2, ceilLog);
+  return { min, max };
+}
+
+function commit(fn, el) {
+  fn();
+  el.blur();
+  if (window.render) window.render();
+}
+
+function onCommit(id, fn) {
+  const el = document.getElementById(id);
+
+  el.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      fn();
+      el.blur();
+      if (window.render) window.render();
+    }
+  });
+
+  el.addEventListener("blur", () => {
+    fn();
+    if (window.render) window.render();
+  });
+}
+
+function updateSliderBounds(rounds) {
+  const slider = document.getElementById("entrants_slider");
+  const { min, max } = getEntrantBoundsForRounds(rounds);
+  slider.min = min;
+  slider.max = max;
+}
+
+function syncFromEntrantsText() {
+  const entInput   = document.getElementById("entrants");
+  const roundsDisp  = document.getElementById("rounds_display");
+  const roundsSlider = document.getElementById("rounds");
+  const slider     = document.getElementById("entrants_slider");
+
+  let ent = +entInput.value;
+
+  if (ent < 65) ent = 65;
+  if (ent > 4096) ent = 4096;
+
+  entInput.value = ent;
+
+  const rounds = entrantsToRounds(ent);
+
+  roundsDisp.textContent = rounds;
+  roundsSlider.value = rounds;
+
+  updateSliderBounds(rounds);
+
+  const { min, max } = getEntrantBoundsForRounds(rounds);
+  const entClamped = Math.max(min, Math.min(max, ent));
+
+  entInput.value = entClamped;
+  slider.value   = entClamped;
+}
+
+function syncFromRoundsMantissa() {
+  const entInput   = document.getElementById("entrants");
+  const roundsDisp = document.getElementById("rounds_display");
+  const slider     = document.getElementById("entrants_slider");
+
+  const rounds = +roundsDisp.textContent;
+  const ent    = +entInput.value;
+
+  const mantissa = getMantissa(ent);
+  const newEnt   = roundsToEntrants(rounds, mantissa);
+
+  updateSliderBounds(rounds);
+
+  const { min, max } = getEntrantBoundsForRounds(rounds);
+  const entClamped = Math.max(min, Math.min(max, newEnt));
+
+  entInput.value = entClamped;
+  slider.value   = entClamped;
+}
+
 window.updateFromEntrants = function() {
-  syncRoundsFromEntrants();
+  syncFromEntrantsText();
   if (window.render) window.render();
 };
 
-// Input listeners (index owns coupling)
-document.getElementById("entrants").addEventListener("input", () => {
-  syncRoundsFromEntrants();
-  if (window.render) window.render();
-});
+function linkEntrantsSlider() {
+  const entInput   = document.getElementById("entrants");
+  const slider     = document.getElementById("entrants_slider");
 
-document.getElementById("rounds").addEventListener("input", () => {
-  syncEntrantsFromRounds();
-  if (window.render) window.render();
-});
-
-["tie_rate", "day1_tie_rate"].forEach(id => {
-  document.getElementById(id).addEventListener("input", () => {
+  slider.addEventListener("input", () => {
+    const ent = +slider.value;
+    entInput.value = ent;
     if (window.render) window.render();
   });
+
+  onCommit("entrants", () => {
+    syncFromEntrantsText();
+  });
+}
+
+document.getElementById("rounds").addEventListener("input", () => {
+  const rounds = +document.getElementById("rounds").value;
+  document.getElementById("rounds_display").textContent = rounds;
+  syncFromRoundsMantissa();
+  if (window.render) window.render();
 });
 
-// Initial sync; D3 will render once it loads
-syncRoundsFromEntrants();
+document.getElementById("tie_rate").addEventListener("input", () => {
+  const v = +document.getElementById("tie_rate").value;
+  document.getElementById("tie_rate_display").textContent = v;
+  if (window.render) window.render();
+});
+
+document.getElementById("day1_tie_rate").addEventListener("input", () => {
+  const v = +document.getElementById("day1_tie_rate").value;
+  document.getElementById("day1_tie_rate_display").textContent = v;
+  if (window.render) window.render();
+});
+
+(function initCoupling() {
+  const entInput   = document.getElementById("entrants");
+  const roundsDisp = document.getElementById("rounds_display");
+  const roundsSlider = document.getElementById("rounds");
+  const slider     = document.getElementById("entrants_slider");
+
+  const initialEnt    = +entInput.value;
+  const initialRounds = entrantsToRounds(initialEnt);
+
+  roundsDisp.textContent = initialRounds;
+  roundsSlider.value = initialRounds;
+
+  updateSliderBounds(initialRounds);
+
+  const { min, max } = getEntrantBoundsForRounds(initialRounds);
+  const entClamped = Math.max(min, Math.min(max, initialEnt));
+
+  entInput.value = entClamped;
+  slider.value   = entClamped;
+
+  linkEntrantsSlider();
+
+  if (window.render) window.render();
+})();
 </script>
+
 
 <script src="d3_render.js"></script>
 </body>

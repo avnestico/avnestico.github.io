@@ -88,16 +88,21 @@ d3Script.onload = () => {
       xGridTicks.push(v);
     }
 
-    g.append("g")
+    const xGridAxis = g.append("g")
       .attr("transform", `translate(0,${innerHeight})`)
       .call(
         d3.axisBottom(xScale)
           .tickValues(xGridTicks)
           .tickSize(-innerHeight)
           .tickFormat("")
-      )
-      .selectAll("line")
-      .attr("stroke", "#eee");
+      );
+
+    const [domainMin, domainMax] = xScale.domain();
+
+    xGridAxis.selectAll("line")
+      .attr("stroke", "#eee")
+      .filter(d => d === domainMin || d === domainMax)
+      .remove();
 
     // Tick spacing override for rounds 11 and 14
     const tickSpacingMap = {
@@ -117,13 +122,14 @@ d3Script.onload = () => {
     }
 
     // Axes
-    g.append("g")
+    const xAxis = g.append("g")
       .attr("transform", `translate(0,${innerHeight})`)
       .call(
         d3.axisBottom(xScale)
           .tickValues(xTickVals)
-      )
-      .selectAll("text")
+      );
+
+    xAxis.selectAll("text")
       .style("font-size", "14px");
 
     g.append("g")
@@ -209,7 +215,6 @@ d3Script.onload = () => {
     svg.on("mousedown", (ev) => {
       const bb = svg.node().getBoundingClientRect();
 
-      // Screen → SVG coordinate conversion
       const scale = width / bb.width;
       const svgPx = (ev.clientX - bb.left) * scale;
 
@@ -248,7 +253,6 @@ d3Script.onload = () => {
       dragging = true;
     });
 
-
     // --- DRAG LOGIC ---
     let dragging = false;
 
@@ -257,7 +261,6 @@ d3Script.onload = () => {
 
       const bb = svg.node().getBoundingClientRect();
 
-      // Screen → SVG coordinate conversion
       const scale = width / bb.width;
       const svgPx = (ev.clientX - bb.left) * scale;
 
