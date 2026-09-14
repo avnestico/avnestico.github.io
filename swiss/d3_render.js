@@ -33,7 +33,7 @@ d3Script.onload = () => {
 
     const width = 800;
     const height = 400;
-    const margin = { top: 10, right: 20, bottom: 50, left: 70 };
+    const margin = { top: 10, right: 20, bottom: 55, left: 75 };
 
     const svg = d3.select("#plot")
       .append("svg")
@@ -131,18 +131,18 @@ d3Script.onload = () => {
       );
 
     xAxis.selectAll("text")
-      .style("font-size", "14px");
+      .style("font-size", "18px");
 
     g.append("g")
       .call(d3.axisLeft(yScale).ticks(10).tickFormat(d => d + "%"))
       .selectAll("text")
-      .style("font-size", "14px");
+      .style("font-size", "18px");
 
     svg.append("text")
       .attr("x", width / 2)
       .attr("y", height - 10)
       .attr("text-anchor", "middle")
-      .style("font-size", "14px")
+      .style("font-size", "18px")
       .text("Entrants");
 
     svg.append("text")
@@ -150,7 +150,7 @@ d3Script.onload = () => {
       .attr("x", -height / 2)
       .attr("y", 20)
       .attr("text-anchor", "middle")
-      .style("font-size", "14px")
+      .style("font-size", "18px")
       .text("X-1-2 Cut Probability (%)");
 
     // Curve data
