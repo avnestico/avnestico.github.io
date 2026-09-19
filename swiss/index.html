@@ -267,65 +267,55 @@ body {
 
 
 <script>
+const summary_delta_combined_csv = `
+CeilingLogEntrants,TieRate,Delta,DeltaShift
+7,0.1,0.878,0.2635
+7,0.11,0.8955,0.2509
+7,0.12,0.9158,0.2308
+7,0.13,0.9354,0.227
+7,0.14,0.957,0.2204
+7,0.15,0.9752,0.2073
+8,0.1,0.7208,0.2983
+8,0.11,0.7443,0.2752
+8,0.12,0.7717,0.2847
+8,0.13,0.7982,0.2505
+8,0.14,0.8258,0.2451
+8,0.15,0.8524,0.235
+9,0.1,0.5552,0.2534
+9,0.11,0.5865,0.2323
+9,0.12,0.6252,0.2251
+9,0.13,0.6621,0.2214
+9,0.14,0.7001,0.2156
+9,0.15,0.7393,0.208
+10,0.1,0.4055,0.2029
+10,0.11,0.4496,0.1943
+10,0.12,0.4982,0.1903
+10,0.13,0.5444,0.1777
+10,0.14,0.5999,0.1957
+10,0.15,0.6481,0.1635
+11,0.1,0.2803,0.1738
+11,0.11,0.3359,0.1679
+11,0.12,0.3919,0.1538
+11,0.13,0.4516,0.1427
+11,0.14,0.5166,0.1379
+11,0.15,0.5775,0.1326
+12,0.1,0.1682,0.1299
+12,0.11,0.2398,0.1484
+12,0.12,0.3069,0.1367
+12,0.13,0.379,0.1238
+12,0.14,0.4584,0.1213
+12,0.15,0.5368,0.126
 
-const summary_delta_csv = `
-CeilingLogEntrants,TieRate,Delta
-7,0.1,0.8791
-7,0.11,0.8963
-7,0.12,0.9145
-7,0.13,0.9314
-7,0.14,0.959
-7,0.15,0.9765
-8,0.1,0.7162
-8,0.11,0.7417
-8,0.12,0.7704
-8,0.13,0.8
-8,0.14,0.824
-8,0.15,0.852
-9,0.1,0.552
-9,0.11,0.5849
-9,0.12,0.6235
-9,0.13,0.6634
-9,0.14,0.6978
-9,0.15,0.745
-10,0.1,0.4085
-10,0.11,0.4524
-10,0.12,0.498
-10,0.13,0.5451
-10,0.14,0.6042
-10,0.15,0.6477
-11,0.1,0.277
-11,0.11,0.3307
-11,0.12,0.3876
-11,0.13,0.4526
-11,0.14,0.5146
-11,0.15,0.5787
-12,0.1,0.1739
-12,0.11,0.231
-12,0.12,0.3073
-12,0.13,0.3822
-12,0.14,0.4515
-12,0.15,0.5329
 `;
-
-const summary_shift_csv = `
-CeilingLogEntrants,DeltaShift
-7,0.233
-8,0.261
-9,0.223
-10,0.187
-11,0.14
-12,0.121
-`;
-
 const summary_k_csv = `
 CeilingLogEntrants,K
-7,11.3522
-8,11.1269
-9,11.2313
-10,10.6697
-11,9.9951
-12,9.2332
+7,11.3604
+8,11.1438
+9,11.3095
+10,10.9122
+11,10.5616
+12,10.3604
+
 `;
 </script>
 
@@ -344,9 +334,8 @@ function parseCSV(text) {
   });
 }
 
-const summary_delta = parseCSV(summary_delta_csv);
-const summary_shift = parseCSV(summary_shift_csv);
-const summary_k     = parseCSV(summary_k_csv);
+const summary_delta = parseCSV(summary_delta_combined_csv);
+const summary_k = parseCSV(summary_k_csv);
 
 function lookup(table, filters, returnCol) {
   const row = table.find(row =>
@@ -358,25 +347,18 @@ function lookup(table, filters, returnCol) {
 
 const BASE_DAY1_TIE_RATE = 0.75;
 
-function get_base_delta(ceilLogEntrants, tieRateFloat) {
-  return lookup(summary_delta,
+function get_delta(ceilLogEntrants, tieRateFloat, day1TieRatePercent) {
+  const baseDelta = lookup(summary_delta,
     { CeilingLogEntrants: ceilLogEntrants, TieRate: tieRateFloat },
     "Delta"
   );
-}
 
-function get_delta_shift(ceilLogEntrants, day1TieRatePercent) {
-  const baseShift = lookup(summary_shift,
-    { CeilingLogEntrants: ceilLogEntrants },
+  const deltaShift = lookup(summary_delta,
+    { CeilingLogEntrants: ceilLogEntrants, TieRate: tieRateFloat },
     "DeltaShift"
   );
-  return (day1TieRatePercent/100 - BASE_DAY1_TIE_RATE) * baseShift;
-}
 
-function get_delta(ceilLogEntrants, tieRateFloat, day1TieRatePercent) {
-  const base = get_base_delta(ceilLogEntrants, tieRateFloat);
-  const shift = get_delta_shift(ceilLogEntrants, day1TieRatePercent);
-  return base + shift;
+  return baseDelta + (day1TieRatePercent/100 - BASE_DAY1_TIE_RATE) * deltaShift;
 }
 
 function get_k(ceilLogEntrants) {
