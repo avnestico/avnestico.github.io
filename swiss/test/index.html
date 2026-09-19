@@ -614,12 +614,21 @@ document.getElementById("day1_tie_rate").addEventListener("input", () => {
 <script src="d3_render.js"></script>
 
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-SBQJ7RCH0X"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'analytics_storage': 'denied'
+  });
+</script>
 
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SBQJ7RCH0X"></script>
+
+<script>
+  gtag('js', new Date());
   gtag('config', 'G-SBQJ7RCH0X');
 </script>
 
